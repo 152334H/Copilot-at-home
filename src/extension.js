@@ -33,10 +33,13 @@ async function activate(context) {
 
 	//A command to open the Codegenx window
 	context.subscriptions.push(vscode.commands.registerCommand('codegenx.open_CodeGenX', async () => {
+		
+		/*
 		if (token == "") {
 			vscode.window.showInformationMessage(`It looks like you do not have an API token. You can go to ${website} for instructions on how to get one.`);
 			return;
 		}
+		*/
 
 		const editor = vscode.window.activeTextEditor;
 		if (!editor) {
@@ -67,23 +70,23 @@ async function activate(context) {
 			const params = new URLSearchParams(uri.query);
 
 			if (params.get('loading') === 'true') {
-				return `/* CodeGenX is generating the output */\n`;
+				return `/* Copilot@home is generating the output */\n`;
 			}
 
 			var word = params.get('word');
 
 			try {
 				word = word.replaceAll(comment_proxy, "#");
-				const payload = { 'input': word, 'max_length': token_max_length, 'temperature': temp, 'token': token };
+				const payload = { 'input': word, 'max_length': token_max_length, 'alpha': 0.4, 'top_k': 3 };
 				const agent = new https.Agent({  
 					rejectUnauthorized: false
 				  });
-				const result = await axios.post(`https://api.deepgenx.com:5700/generate`, payload, { httpsAgent: agent });
+				const result = await axios.post(`http://localhost:5700/generate`, payload, { httpsAgent: agent });
 
 				if (result.data.success) {
 
 					//return getGPTText(Array(result.data.message)) + "\n" + getSOText(word);
-					return getGPTText(Array(result.data.message));
+					return getGPTText(word, result.data.message);
 				} else {
 					// vscode.window.showErrorMessage(result.data.error.message);
 					return result.data.error.message;
@@ -99,9 +102,9 @@ async function activate(context) {
 	//Open the CodeGenX window to display the functions
 	const open_CodeGenX = async (word) => {
 		//A uri to send to the document
-		let loadingUri = vscode.Uri.parse(`${myScheme}:CodeGenX?word=${word}&loading=true`, true);
+		let loadingUri = vscode.Uri.parse(`${myScheme}:notcopilot?word=${word}&loading=true`, true);
 		await showUri(loadingUri); //Open a loading window
-		let uri = vscode.Uri.parse(`${myScheme}:CodeGenX?word=${word}&loading=false`, true);
+		let uri = vscode.Uri.parse(`${myScheme}:notcopilot?word=${word}&loading=false`, true);
 		//TODO If the uri has already been loaded, the codelense breaks
 		await showUri(uri); //Show the actual content, once got from the server
 	}
@@ -116,21 +119,22 @@ async function activate(context) {
 		vscode.languages.setTextDocumentLanguage(doc, 'python'); //Enables syntax highlighting
 	}
 
-	const getGPTText = (text) => {
+	const getGPTText = (prompt, text) => {
 		codelensProvider.clearPositions();
-		let content = `/* CodeGenX is suggesting the following */\n`;
-		let splitted_text = text[0];
+		let content = `/* copilot@home is suggesting the following */\n`;
+
+		const to_add = text.slice(prompt.length)
+		codelensProvider.addPosition(1, to_add);
+		content += text;
+		/*
 		for (let i = 0; i < splitted_text.length; i++) {
 			const lineNum = content.split('\n').length; //The line to insert the codelens on
-			if (i === 0) {
-				codelensProvider.addPosition(lineNum, splitted_text[i]);
-			} //Add a codelens on that line
-			if (i != 0) {
-				codelensProvider.addPosition(lineNum - 1, splitted_text[i]);
-			}
+			const sub = i ? 1 : 0;
+			codelensProvider.addPosition(lineNum - sub, splitted_text[i]);
 			content += splitted_text[i]; //Display the entire function in the CodeGenX window
 			if (i < splitted_text.length - 1) content += '\n\n';
 		}
+		*/
 		return content;
 	}
 

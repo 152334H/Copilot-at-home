@@ -1,7 +1,7 @@
 {
 	"name": "codegenx",
 	"publisher": "DeepGenX",
-	"displayName": "CodeGenX",
+	"displayName": "copilot@home",
 	"description": "CodeGenX - A code autocompletion tool based on GPT-J",
 	"license": "SEE LICENSE IN LICENSE",
 	"homepage": "https://github.com/DeepGenX/CodeGenX",
@@ -53,7 +53,7 @@
 		],
 		"configuration": [
 			{
-				"title": "CodeGenX",
+				"title": "copilot@home",
 				"properties": {
 					"Codegenx.Temperature": {
 						"type": "number",
