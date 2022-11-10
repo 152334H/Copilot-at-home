@@ -14,8 +14,9 @@ To experimentally run this plugin, you can
 This project was created in less than 6 hours and has almost zero features at the moment.
 
 Current short-term goals:
+
 0. fix obvious bugs (context length, failure to redo completion request)
-1. configuration options (inference max length, temperature options, model choice)
+1. configuration options (inference config, multiple completion options, model choice)
 2. copilot-like tab-completion
 3. reduce hardware requirements (e.g. lower RAM spike, lower vram with LLM.int8, use accelerate and other speedups)
 
